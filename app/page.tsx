@@ -1,16 +1,15 @@
 import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: "andrej@lilablau.club",
-    password: "44444444"
-  });
+  if (user) {
+    redirect("/app");
+  }
 
-  return (
-    <div>
-      <script dangerouslySetInnerHTML={{ __html: `console.log(${JSON.stringify(data.session?.access_token)})` }} />
-    </div>
-  );
+  redirect("/login");
 }

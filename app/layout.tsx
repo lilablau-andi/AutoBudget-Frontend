@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import { Public_Sans } from "next/font/google"
+import { Public_Sans } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar";
 
 const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-sans"
-})
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -21,16 +19,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${publicSans.variable} antialiased`}
-      >
-        <SidebarProvider>
-          <AppSidebar />
-          <main>
-            <SidebarTrigger />
-            {children}
-          </main>
-        </SidebarProvider>
+      <body className={`${publicSans.variable} antialiased`}>
+        <main>{children}</main>
       </body>
     </html>
   );
