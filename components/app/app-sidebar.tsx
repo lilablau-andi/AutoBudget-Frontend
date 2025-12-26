@@ -9,7 +9,7 @@ import {
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Logo } from "./ui/logo";
+import { Logo } from "../ui/logo";
 import {
   Sidebar,
   SidebarContent,
@@ -24,8 +24,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { NavUser } from "./ui/nav-user";
-import { Button } from "./ui/button";
+import { NavUser } from "../ui/nav-user";
+import { Button } from "../ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -47,7 +47,7 @@ const items = [
     items: [
       {
         title: "Alle Ausgaben",
-        url: "/ausgaben/alle-ausgaben",
+        url: "/app/ausgaben/all",
       },
       {
         title: "Wiederkehrend",

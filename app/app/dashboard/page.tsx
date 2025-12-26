@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 
-export default async function Home() {
+export default async function Dashboard() {
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signInWithPassword({
