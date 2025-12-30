@@ -3,18 +3,11 @@ import { createClient } from "@/utils/supabase/server";
 export default async function Dashboard() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: "andrej@lilablau.club",
-    password: "44444444",
-  });
+  const { data, error } = await supabase.auth.getSession();
 
   return (
     <div>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `console.log(${JSON.stringify(data.session?.access_token)})`,
-        }}
-      />
+      <p>`JWT: {JSON.stringify(data.session?.access_token)}`</p>
     </div>
   );
 }

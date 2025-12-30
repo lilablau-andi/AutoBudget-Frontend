@@ -27,10 +27,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { de } from "date-fns/locale";
 import { useState } from "react";
-import { Invoice } from "./types";
+import { Expense } from "../../lib/types";
 
 interface ExpensesTableToolbarProps {
-  table: Table<Invoice>;
+  table: Table<Expense>;
   dateRange: DateRange | undefined;
   setDateRange: (range: DateRange | undefined) => void;
   categories: string[];
@@ -186,7 +186,7 @@ export function ExpensesTableToolbar({
               setDateRange(range);
 
               table
-                .getColumn("date")
+                .getColumn("expense_date")
                 ?.setFilterValue(range?.from || range?.to ? range : undefined);
             }}
             locale={de}

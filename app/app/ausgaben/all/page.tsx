@@ -5,30 +5,31 @@ import { ExpensesTable } from "@/components/expenses/expenses-table";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { getExpenses } from "@/utils/api/expenses";
-import { Expense } from "@/components/expenses/types";
+import { Expense } from "@/lib/types";
+import AddExpenseDialog from "@/components/expenses/add-expense-dialog";
 
 export default function AllExpensesPage() {
   const supabase = createClient();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const loadExpenses = async () => {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+
+    if (!token) return;
+
+    try {
+      const expenses = await getExpenses(token);
+      setExpenses(expenses);
+    } catch (error) {
+      console.error("Failed to load expenses:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadExpenses = async () => {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-
-      if (!token) return;
-
-      try {
-        const expenses = await getExpenses(token);
-        setExpenses(expenses);
-      } catch (error) {
-        console.error("Failed to load expenses:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadExpenses();
   }, []);
 
@@ -38,8 +39,15 @@ export default function AllExpensesPage() {
 
   return (
     <div>
-      <SetHeaderTitle title="Alle Ausgaben" />
-      <ExpensesTable data={expenses} />
+      <SetHeaderTitle
+        title="Alle Ausgaben"
+        action={<AddExpenseDialog onExpenseAdded={loadExpenses} />}
+      />
+      <ExpensesTable
+        data={expenses}
+        onExpenseDeleted={loadExpenses}
+        onExpenseUpdated={loadExpenses}
+      />
     </div>
   );
 }

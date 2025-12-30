@@ -36,7 +36,7 @@ import {
 const items = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/app/dashboard",
     icon: DashboardSpeed01Icon,
   },
   {
@@ -57,7 +57,7 @@ const items = [
   },
   {
     title: "Kategorien",
-    url: "/kategorien",
+    url: "/app/kategorien",
     icon: BlockGameIcon,
   },
   {
