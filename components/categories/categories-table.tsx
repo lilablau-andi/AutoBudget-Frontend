@@ -18,17 +18,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Category } from "@/utils/api/categories";
 import { columns } from "./categories-table-columns";
 
 interface CategoriesTableProps {
   data: Category[];
+  loading?: boolean;
   onCategoryDeleted?: () => void;
   onCategoryUpdated?: () => void;
 }
 
 export function CategoriesTable({
   data,
+  loading,
   onCategoryDeleted,
   onCategoryUpdated,
 }: CategoriesTableProps) {
@@ -72,7 +75,17 @@ export function CategoriesTable({
         </TableHeader>
 
         <TableBody>
-          {table.getRowModel().rows.length > 0 ? (
+          {loading ? (
+            Array.from({ length: 5 }).map((_, i) => (
+              <TableRow key={i}>
+                {columns.map((_, j) => (
+                  <TableCell key={j}>
+                    <Skeleton className="h-4 w-full" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : table.getRowModel().rows.length > 0 ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (

@@ -32,10 +32,6 @@ export default function Kategorien() {
     loadCategories();
   }, []);
 
-  if (loading) {
-    return <div className="p-4">Lade Kategorien...</div>;
-  }
-
   return (
     <div>
       <SetHeaderTitle
@@ -44,6 +40,7 @@ export default function Kategorien() {
       />
       <CategoriesTable
         data={categories}
+        loading={loading}
         onCategoryDeleted={loadCategories}
         onCategoryUpdated={loadCategories}
       />

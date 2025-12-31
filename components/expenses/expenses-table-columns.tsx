@@ -10,6 +10,7 @@ import {
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Expense } from "../../lib/types";
 import { ExpenseActions } from "./expense-actions";
+import { CategoryCell } from "./category-cell";
 
 function SortIcon({ column }: { column: any }) {
   const sorted = column.getIsSorted();
@@ -85,16 +86,24 @@ export const columns: ColumnDef<Expense>[] = [
         <SortIcon column={column} />
       </Button>
     ),
-    cell: ({ row }) => {
-      const category = row.getValue("category") as Expense["category"];
-      if (!category) {
-        return (
-          <span className="text-muted-foreground italic">
-            ... Kategorie zuweisen
-          </span>
-        );
-      }
-      return category.name;
+    cell: ({ row, table }) => {
+      const expense = row.original;
+      return (
+        <CategoryCell
+          expense={expense}
+          onExpenseUpdated={() => {
+            const meta = table.options.meta as {
+              onExpenseDeleted?: () => void;
+              onExpenseUpdated?: () => void;
+            };
+            if (meta?.onExpenseUpdated) {
+              meta.onExpenseUpdated();
+            } else if (meta?.onExpenseDeleted) {
+              meta.onExpenseDeleted();
+            }
+          }}
+        />
+      );
     },
     filterFn: (row, columnId, filterValue: string[]) => {
       if (!filterValue || filterValue.length === 0) return true;

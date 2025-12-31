@@ -118,14 +118,12 @@ export default function AddCategoryDialog({
             <div className="grid gap-2">
               <Label htmlFor="type">Typ</Label>
               <Select
-                value={formData.type}
+                value={formData.type === "expense" ? "Ausgabe" : "Einnahme"}
                 onValueChange={(value) => {
-                  if (value) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      type: value as CategoryType,
-                    }));
-                  }
+                  setFormData((prev) => ({
+                    ...prev,
+                    type: value === "Ausgabe" ? "expense" : "income",
+                  }));
                 }}
                 required
               >
@@ -133,12 +131,13 @@ export default function AddCategoryDialog({
                   <SelectValue placeholder="Typ wählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="expense">Ausgabe</SelectItem>
-                  <SelectItem value="income">Einnahme</SelectItem>
+                  <SelectItem value="Ausgabe">Ausgabe</SelectItem>
+                  <SelectItem value="Einnahme">Einnahme</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
           <DialogFooter>
             <DialogClose
               render={

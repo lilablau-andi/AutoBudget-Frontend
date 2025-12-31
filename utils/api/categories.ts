@@ -25,19 +25,21 @@ export async function getCategories(token: string): Promise<Category[]> {
 
 export async function createCategory(
   token: string,
-  category: {
+  category: FormData | {
     name: string
     type: CategoryType
   }
 ) {
+  const isFormData = category instanceof FormData;
   const res = await fetch(`${API_BASE_URL}/categories`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
     },
-    body: JSON.stringify(category),
+    body: isFormData ? category : JSON.stringify(category),
   })
+
 
   if (!res.ok) {
     throw new Error("Failed to create category")
@@ -82,3 +84,27 @@ export async function deleteCategory(token: string, id: number) {
     throw new Error("Failed to delete category")
   }
 }
+
+export async function patchCategory(
+  token: string,
+  id: number,
+  data: FormData | Partial<Category>
+) {
+  const isFormData = data instanceof FormData;
+  
+  const res = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
+    },
+    body: isFormData ? data : JSON.stringify(data),
+  })
+
+  if (!res.ok) {
+    throw new Error("Failed to patch category")
+  }
+
+  return res.json()
+}
+

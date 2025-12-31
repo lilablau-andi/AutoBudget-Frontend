@@ -16,21 +16,42 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/utils/supabase/client";
 import { createExpense } from "@/utils/api/expenses";
+import { CalendarIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { de } from "date-fns/locale";
+import { format, parse } from "date-fns";
+import { CategorySelect } from "./category-select";
 
 interface AddExpenseDialogProps {
   onExpenseAdded?: () => void;
+}
+
+function formatDate(date: Date | undefined) {
+  if (!date) return "";
+  return format(date, "dd.MM.yyyy", { locale: de });
+}
+
+function isValidDate(date: Date | undefined) {
+  return date instanceof Date && !isNaN(date.getTime());
 }
 
 export default function AddExpenseDialog({
   onExpenseAdded,
 }: AddExpenseDialogProps) {
   const [open, setOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [formData, setFormData] = useState({
     description: "",
     amount: "",
     date: new Date().toISOString().split("T")[0],
     categoryId: "",
   });
+  const [dateValue, setDateValue] = useState(formatDate(new Date()));
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +67,7 @@ export default function AddExpenseDialog({
       }
 
       await createExpense(token, {
-        amount: parseFloat(formData.amount),
+        amount: parseFloat(formData.amount.replace(",", ".")),
         description: formData.description,
         expense_date: formData.date,
         category_id: isNaN(parseInt(formData.categoryId))
@@ -63,6 +84,7 @@ export default function AddExpenseDialog({
         date: new Date().toISOString().split("T")[0],
         categoryId: "",
       });
+      setDateValue(formatDate(new Date()));
 
       if (onExpenseAdded) {
         onExpenseAdded();
@@ -90,7 +112,7 @@ export default function AddExpenseDialog({
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-[425px] w-56">
+      <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Ausgabe hinzufügen</DialogTitle>
@@ -117,24 +139,97 @@ export default function AddExpenseDialog({
                 <Input
                   id="amount"
                   name="amount"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0,00"
                   value={formData.amount}
                   onChange={handleChange}
                   required
+                  pattern="^[0-9]+([,.][0-9]{0,2})?$"
+                  onInvalid={(e) =>
+                    (e.target as HTMLInputElement).setCustomValidity(
+                      "Bitte geben Sie einen gültigen Betrag ein (z.B. 12,34)"
+                    )
+                  }
+                  onInput={(e) =>
+                    (e.target as HTMLInputElement).setCustomValidity("")
+                  }
                 />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="date">Datum</Label>
-                <Input
-                  id="date"
-                  name="date"
-                  type="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  required
-                />
+                <div className="relative flex gap-2">
+                  <Input
+                    id="date"
+                    value={dateValue}
+                    placeholder={formatDate(new Date())}
+                    className="bg-background pr-10"
+                    onChange={(e) => {
+                      setDateValue(e.target.value);
+                      // Try to parse German format
+                      try {
+                        const parsedDate = parse(
+                          e.target.value,
+                          "dd.MM.yyyy",
+                          new Date(),
+                          { locale: de }
+                        );
+                        if (isValidDate(parsedDate)) {
+                          setFormData((prev) => ({
+                            ...prev,
+                            date: parsedDate.toISOString().split("T")[0],
+                          }));
+                        }
+                      } catch {
+                        // Ignore parse errors while typing
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        setCalendarOpen(true);
+                      }
+                    }}
+                    required
+                  />
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger
+                      render={
+                        <Button
+                          id="date-picker"
+                          variant="ghost"
+                          type="button"
+                          className="absolute top-1/2 right-2 size-6 -translate-y-1/2 p-0"
+                        >
+                          <CalendarIcon className="size-3.5" />
+                          <span className="sr-only">Datum auswählen</span>
+                        </Button>
+                      }
+                    />
+                    <PopoverContent
+                      className="w-auto overflow-hidden p-0"
+                      align="end"
+                      alignOffset={-8}
+                      sideOffset={10}
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={new Date(formData.date)}
+                        onSelect={(date) => {
+                          if (date) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              date: date.toISOString().split("T")[0],
+                            }));
+                            setDateValue(formatDate(date));
+                            setCalendarOpen(false);
+                          }
+                        }}
+                        locale={de}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
             </div>
             {/* 
@@ -142,18 +237,16 @@ export default function AddExpenseDialog({
               Currently using a simple ID input or defaulting if left empty in logic.
             */}
             <div className="grid gap-2">
-              <Label htmlFor="categoryId">Kategorie ID</Label>
-              <Input
-                id="categoryId"
-                name="categoryId"
-                type="number"
-                placeholder="ID eingeben"
+              <Label htmlFor="categoryId">Kategorie</Label>
+              <CategorySelect
                 value={formData.categoryId}
-                onChange={handleChange}
-                required
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, categoryId: value }))
+                }
               />
             </div>
           </div>
+
           <DialogFooter>
             <DialogClose
               render={
