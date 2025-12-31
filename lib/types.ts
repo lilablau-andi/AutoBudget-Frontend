@@ -5,6 +5,8 @@ export type Category = {
   created_at: string;
 };
 
+
+
 export type Expense = {
   id: number;
   amount: number;
@@ -13,4 +15,18 @@ export type Expense = {
   type: string;
   expense_date: string;
   description?: string;
+};
+
+
+
+export type PaginationMeta = {
+  total_count: number;
+  total_pages: number;
+  page: number;
+  page_size: number;
+};
+
+export type PaginatedResponse<T> = {
+  items: T[];
+  meta: PaginationMeta;
 };

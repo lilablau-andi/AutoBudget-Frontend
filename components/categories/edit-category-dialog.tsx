@@ -21,7 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createClient } from "@/utils/supabase/client";
-import { Category, updateCategory, CategoryType } from "@/utils/api/categories";
+import { Category, patchCategory, CategoryType } from "@/utils/api/categories";
+
 import { toast } from "sonner";
 
 interface EditCategoryDialogProps {
@@ -63,7 +64,7 @@ export default function EditCategoryDialog({
         throw new Error("Nicht authentifiziert");
       }
 
-      await updateCategory(token, category.id, {
+      await patchCategory(token, category.id, {
         name: formData.name,
         type: formData.type,
       });
@@ -114,14 +115,12 @@ export default function EditCategoryDialog({
             <div className="grid gap-2">
               <Label htmlFor="type">Typ</Label>
               <Select
-                value={formData.type}
+                value={formData.type === "expense" ? "Ausgabe" : "Einnahme"}
                 onValueChange={(value) => {
-                  if (value) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      type: value as CategoryType,
-                    }));
-                  }
+                  setFormData((prev) => ({
+                    ...prev,
+                    type: value === "Ausgabe" ? "expense" : "income",
+                  }));
                 }}
                 required
               >
@@ -129,12 +128,13 @@ export default function EditCategoryDialog({
                   <SelectValue placeholder="Typ wählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="expense">Ausgabe</SelectItem>
-                  <SelectItem value="income">Einnahme</SelectItem>
+                  <SelectItem value="Ausgabe">Ausgabe</SelectItem>
+                  <SelectItem value="Einnahme">Einnahme</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
+
           <DialogFooter>
             <DialogClose
               render={

@@ -19,25 +19,50 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
-import { DateRange } from "react-day-picker";
-import { Expense } from "../../lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Expense, Category, PaginationMeta } from "../../lib/types";
 import { ExpensesTableToolbar } from "./expenses-table-toolbar";
 import { columns } from "./expenses-table-columns";
+import { DateRange } from "react-day-picker";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface ExpensesTableProps {
   data: Expense[];
+  loading?: boolean;
+  dateRange?: DateRange;
+  onDateRangeChange: (range: DateRange | undefined) => void;
+  categories: Category[];
+  selectedCategoryIds: number[];
+  onCategoryIdsChange: (ids: number[]) => void;
   onExpenseDeleted?: () => void;
   onExpenseUpdated?: () => void;
+  pagination?: PaginationMeta;
+  onPageChange?: (page: number) => void;
 }
 
 export function ExpensesTable({
   data,
+  loading,
+  dateRange,
+  onDateRangeChange,
+  categories,
+  selectedCategoryIds,
+  onCategoryIdsChange,
   onExpenseDeleted,
   onExpenseUpdated,
+  pagination,
+  onPageChange,
 }: ExpensesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const table = useReactTable({
     data,
@@ -56,65 +81,165 @@ export function ExpensesTable({
       onExpenseUpdated,
     },
   });
-  const categories = Array.from(
-    new Set(
-      data
-        .map((item) => item.category?.name)
-        .filter((name): name is string => !!name)
-    )
-  );
 
   return (
     <>
       <ExpensesTableToolbar
         table={table}
+        loading={loading}
         dateRange={dateRange}
-        setDateRange={setDateRange}
+        onDateRangeChange={onDateRangeChange}
         categories={categories}
+        selectedCategoryIds={selectedCategoryIds}
+        onCategoryIdsChange={onCategoryIdsChange}
       />
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <TableHead key={header.id}>
-                  {flexRender(
-                    header.column.columnDef.header,
-                    header.getContext()
-                  )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
+      <div>
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
 
-        <TableBody>
-          {table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  {columns.map((_, j) => (
+                    <TableCell key={j}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  Keine Ergebnisse.
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
+              </TableRow>
+            )}
+          </TableBody>
 
-        <TableFooter>
-          <TableRow>
-            <TableCell colSpan={3}>Gesamt</TableCell>
-            <TableCell className="text-right">
-              {new Intl.NumberFormat("de-DE", {
-                style: "currency",
-                currency: "EUR",
-              }).format(
-                data.reduce((total, expense) => total + expense.amount, 0)
-              )}
-            </TableCell>
-            <TableCell />
-          </TableRow>
-        </TableFooter>
-      </Table>
+          <TableFooter>
+            <TableRow>
+              <TableCell colSpan={3}>Gesamt</TableCell>
+              <TableCell className="text-right">
+                {new Intl.NumberFormat("de-DE", {
+                  style: "currency",
+                  currency: "EUR",
+                }).format(
+                  data.reduce((total, expense) => total + expense.amount, 0)
+                )}
+              </TableCell>
+              <TableCell />
+            </TableRow>
+          </TableFooter>
+        </Table>
+      </div>
+
+      {pagination && pagination.total_pages > 1 && (
+        <div className="py-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (pagination.page > 1) {
+                      onPageChange?.(pagination.page - 1);
+                    }
+                  }}
+                  className={
+                    pagination.page === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {Array.from({ length: pagination.total_pages }).map((_, i) => {
+                const pageNum = i + 1;
+                // Show current page, first, last, and pages around current
+                if (
+                  pageNum === 1 ||
+                  pageNum === pagination.total_pages ||
+                  (pageNum >= pagination.page - 1 &&
+                    pageNum <= pagination.page + 1)
+                ) {
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        href="#"
+                        isActive={pagination.page === pageNum}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onPageChange?.(pageNum);
+                        }}
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                } else if (
+                  pageNum === pagination.page - 2 ||
+                  pageNum === pagination.page + 2
+                ) {
+                  return (
+                    <PaginationItem key={pageNum}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return null;
+              })}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    if (pagination.page < pagination.total_pages) {
+                      onPageChange?.(pagination.page + 1);
+                    }
+                  }}
+                  className={
+                    pagination.page === pagination.total_pages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </>
   );
 }
