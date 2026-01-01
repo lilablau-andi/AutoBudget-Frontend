@@ -7,6 +7,7 @@ import { createClient } from "@/utils/supabase/client";
 import { getExpenses } from "@/utils/api/expenses";
 import { Expense, Category, PaginationMeta } from "@/lib/types";
 import AddExpenseDialog from "@/components/expenses/add-expense-dialog";
+import ImportCSVDialog from "@/components/expenses/import-csv-dialog";
 import { subDays, format } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { getCategories } from "@/utils/api/categories";
@@ -20,6 +21,9 @@ export default function AllExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([]);
+  const [selectedType, setSelectedType] = useState<
+    "expense" | "income" | undefined
+  >();
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: subDays(new Date(), 30),
     to: new Date(),
@@ -43,6 +47,7 @@ export default function AllExpensesPage() {
         start,
         end,
         selectedCategoryIds,
+        selectedType,
         page,
         pageSize
       );
@@ -74,13 +79,18 @@ export default function AllExpensesPage() {
 
   useEffect(() => {
     loadExpenses();
-  }, [dateRange, selectedCategoryIds, page, pageSize]);
+  }, [dateRange, selectedCategoryIds, selectedType, page, pageSize]);
 
   return (
     <div>
       <SetHeaderTitle
         title="Alle Ausgaben"
-        action={<AddExpenseDialog onExpenseAdded={loadExpenses} />}
+        action={
+          <div className="flex gap-2">
+            <ImportCSVDialog />
+            <AddExpenseDialog onExpenseAdded={loadExpenses} />
+          </div>
+        }
       />
       <ExpensesTable
         data={expenses}
@@ -94,6 +104,11 @@ export default function AllExpensesPage() {
         selectedCategoryIds={selectedCategoryIds}
         onCategoryIdsChange={(ids) => {
           setSelectedCategoryIds(ids);
+          setPage(1);
+        }}
+        selectedType={selectedType}
+        onTypeChange={(type) => {
+          setSelectedType(type);
           setPage(1);
         }}
         onExpenseDeleted={loadExpenses}

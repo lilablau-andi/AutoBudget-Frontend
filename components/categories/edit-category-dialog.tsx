@@ -94,8 +94,8 @@ export default function EditCategoryDialog({
           <DialogHeader>
             <DialogTitle>Kategorie bearbeiten</DialogTitle>
             <DialogDescription>
-              Ändere hier Deine Kategorie. Drücke 'speichern', um die Änderungen
-              zu übernehmen.
+              Ändere hier Deine Kategorie. Drücke &apos;speichern&apos;, um die
+              Änderungen zu übernehmen.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

@@ -6,6 +6,7 @@ import AddCategoryDialog from "@/components/categories/add-category-dialog";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { getCategories, Category } from "@/utils/api/categories";
+import { CategoryAnalyticsChart } from "@/components/categories/category-analytics-chart";
 
 export default function Kategorien() {
   const supabase = createClient();
@@ -38,12 +39,15 @@ export default function Kategorien() {
         title="Kategorien"
         action={<AddCategoryDialog onCategoryAdded={loadCategories} />}
       />
-      <CategoriesTable
-        data={categories}
-        loading={loading}
-        onCategoryDeleted={loadCategories}
-        onCategoryUpdated={loadCategories}
-      />
+      <div className="space-y-8">
+        <CategoriesTable
+          data={categories}
+          loading={loading}
+          onCategoryDeleted={loadCategories}
+          onCategoryUpdated={loadCategories}
+        />
+        <CategoryAnalyticsChart />
+      </div>
     </div>
   );
 }

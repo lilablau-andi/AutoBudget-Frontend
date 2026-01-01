@@ -1,4 +1,4 @@
-import { PaginatedResponse, Expense } from "@/lib/types";
+import { PaginatedResponse, Expense, ImportedTransaction, ImportPreviewResponse } from "@/lib/types";
 
 const API_BASE_URL = "http://localhost:8000/api/v1"
 
@@ -7,6 +7,7 @@ export async function getExpenses(
   startDate?: string,
   endDate?: string,
   categoryIds?: number[],
+  type?: "expense" | "income",
   page: number = 1,
   pageSize: number = 50
 ): Promise<PaginatedResponse<Expense>> {
@@ -14,6 +15,9 @@ export async function getExpenses(
   url.searchParams.append("page", page.toString());
   url.searchParams.append("page_size", pageSize.toString());
 
+  if (type) {
+    url.searchParams.append("type", type);
+  }
   if (startDate) {
     url.searchParams.append("start_date", startDate);
   }
@@ -128,4 +132,40 @@ export async function patchExpense(
   }
 
   return res.json()
+}
+
+export async function getImportPreview(token: string, file: File): Promise<ImportPreviewResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await fetch(`${API_BASE_URL}/expenses/import/preview`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to get import preview");
+  }
+
+  return res.json();
+}
+
+export async function saveImportBatch(token: string, transactions: ImportedTransaction[]) {
+  const res = await fetch(`${API_BASE_URL}/expenses/import/batch`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ transactions }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to save import batch");
+  }
+
+  return res.json();
 }

@@ -57,7 +57,7 @@ export function CategoriesTable({
   });
 
   return (
-    <div>
+    <div className="border rounded-3xl p-4 shadow-lg">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

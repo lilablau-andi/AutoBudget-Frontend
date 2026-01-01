@@ -8,10 +8,12 @@ import {
   ArrowDown02Icon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import { Badge } from "@/components/ui/badge";
 import { Expense } from "../../lib/types";
 import { ExpenseActions } from "./expense-actions";
 import { CategoryCell } from "./category-cell";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function SortIcon({ column }: { column: any }) {
   const sorted = column.getIsSorted();
 
@@ -72,6 +74,31 @@ export const columns: ColumnDef<Expense>[] = [
       if (to && rowDate > to) return false;
 
       return true;
+    },
+  },
+  {
+    accessorKey: "type",
+    header: "Typ",
+    cell: ({ row }) => {
+      const type = row.getValue("type") as string;
+      const isIncome = type === "income";
+
+      return (
+        <Badge
+          variant={isIncome ? "default" : "outline"}
+          className={
+            isIncome
+              ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20"
+              : "bg-rose-500/10 text-rose-600 border-rose-500/20 hover:bg-rose-500/20"
+          }
+        >
+          {isIncome ? "Einnahme" : "Ausgabe"}
+        </Badge>
+      );
+    },
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue || filterValue.length === 0) return true;
+      return filterValue.includes(row.getValue(columnId));
     },
   },
   {

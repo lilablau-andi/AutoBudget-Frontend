@@ -11,6 +11,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { Category } from "@/utils/api/categories";
 import { CategoryActions } from "./category-actions";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function SortIcon({ column }: { column: any }) {
   const sorted = column.getIsSorted();
 

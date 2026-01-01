@@ -46,6 +46,8 @@ interface ExpensesTableProps {
   onExpenseUpdated?: () => void;
   pagination?: PaginationMeta;
   onPageChange?: (page: number) => void;
+  selectedType?: "expense" | "income";
+  onTypeChange?: (type: "expense" | "income" | undefined) => void;
 }
 
 export function ExpensesTable({
@@ -60,6 +62,8 @@ export function ExpensesTable({
   onExpenseUpdated,
   pagination,
   onPageChange,
+  selectedType,
+  onTypeChange,
 }: ExpensesTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -85,13 +89,13 @@ export function ExpensesTable({
   return (
     <>
       <ExpensesTableToolbar
-        table={table}
-        loading={loading}
         dateRange={dateRange}
         onDateRangeChange={onDateRangeChange}
         categories={categories}
         selectedCategoryIds={selectedCategoryIds}
         onCategoryIdsChange={onCategoryIdsChange}
+        selectedType={selectedType}
+        onTypeChange={onTypeChange}
       />
       <div>
         <Table>
@@ -148,7 +152,7 @@ export function ExpensesTable({
 
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={3}>Gesamt</TableCell>
+              <TableCell colSpan={4}>Gesamt</TableCell>
               <TableCell className="text-right">
                 {new Intl.NumberFormat("de-DE", {
                   style: "currency",
