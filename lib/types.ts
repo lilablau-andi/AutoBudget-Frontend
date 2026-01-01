@@ -17,6 +17,20 @@ export type Expense = {
   description?: string;
 };
 
+export type ImportedTransaction = {
+  expense_date: string;
+  amount: number;
+  description: string;
+  type: "expense" | "income";
+  category_id?: number | null;
+};
+
+export type ImportPreviewResponse = {
+  transactions: ImportedTransaction[];
+  errors: string[];
+  headers_found: string[];
+};
+
 
 
 export type PaginationMeta = {
@@ -29,4 +43,10 @@ export type PaginationMeta = {
 export type PaginatedResponse<T> = {
   items: T[];
   meta: PaginationMeta;
+};
+
+export type CategoryAnalyticsData = {
+  date: string;
+  sum: number;
+  category_name: string;
 };

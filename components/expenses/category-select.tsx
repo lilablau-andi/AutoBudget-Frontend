@@ -18,18 +18,27 @@ interface CategorySelectProps {
   value: string;
   onValueChange: (value: string) => void;
   type?: "expense" | "income";
+  categories?: Category[];
+  placeholder?: string;
 }
 
 export function CategorySelect({
   value,
   onValueChange,
   type = "expense",
+  categories: preloadedCategories,
+  placeholder,
 }: CategorySelectProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [internalCategories, setInternalCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
 
+  const categoriesToUse = preloadedCategories || internalCategories;
+  const filteredCategories = categoriesToUse.filter((c) => c.type === type);
+
   useEffect(() => {
+    if (preloadedCategories) return;
+
     const loadCategories = async () => {
       setLoading(true);
       try {
@@ -38,9 +47,7 @@ export function CategorySelect({
         if (!token) return;
 
         const fetchedCategories = await getCategories(token);
-        // Filter by type if needed
-        const filtered = fetchedCategories.filter((c) => c.type === type);
-        setCategories(filtered);
+        setInternalCategories(fetchedCategories);
       } catch (error) {
         console.error("Failed to load categories:", error);
       } finally {
@@ -49,15 +56,19 @@ export function CategorySelect({
     };
 
     loadCategories();
-  }, [supabase.auth, type]);
+  }, [supabase.auth, preloadedCategories]);
 
-  const selectedCategory = categories.find((c) => c.id.toString() === value);
+  const selectedCategory = categoriesToUse.find(
+    (c) => c.id.toString() === value
+  );
 
   return (
     <Select value={value} onValueChange={(val) => val && onValueChange(val)}>
       <SelectTrigger className="w-full">
         <SelectValue
-          placeholder={loading ? "Lade Kategorien..." : "Kategorie wählen"}
+          placeholder={
+            placeholder || (loading ? "Lade Kategorien..." : "Kategorie wählen")
+          }
         >
           {selectedCategory && (
             <div className="flex items-center gap-2">
@@ -68,12 +79,12 @@ export function CategorySelect({
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {categories.length === 0 && !loading ? (
+        {filteredCategories.length === 0 && !loading ? (
           <div className="p-2 text-sm text-muted-foreground text-center">
             Keine Kategorien gefunden
           </div>
         ) : (
-          categories.map((category) => (
+          filteredCategories.map((category) => (
             <SelectItem key={category.id} value={category.id.toString()}>
               <HugeiconsIcon icon={Tag01Icon} className="h-3 w-3 opacity-50" />
               {category.name}

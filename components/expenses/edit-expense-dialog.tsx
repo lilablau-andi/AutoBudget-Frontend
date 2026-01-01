@@ -125,8 +125,8 @@ export default function EditExpenseDialog({
           <DialogHeader>
             <DialogTitle>Ausgabe bearbeiten</DialogTitle>
             <DialogDescription>
-              Ändere hier Deine Ausgabe. Drücke 'speichern', um die Änderungen
-              zu übernehmen.
+              Ändere hier Deine Ausgabe. Drücke &apos;speichern&apos;, um die
+              Änderungen zu übernehmen.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

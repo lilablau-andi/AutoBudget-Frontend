@@ -117,8 +117,8 @@ export default function AddExpenseDialog({
           <DialogHeader>
             <DialogTitle>Ausgabe hinzufügen</DialogTitle>
             <DialogDescription>
-              Füge hier Deine Ausgabe hinzu. Drücke 'speichern', um Deine
-              Ausgabe hinzuzufügen.
+              Füge hier Deine Ausgabe hinzu. Drücke &apos;speichern&apos;, um
+              Deine Ausgabe hinzuzufügen.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">

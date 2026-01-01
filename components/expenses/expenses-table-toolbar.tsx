@@ -1,6 +1,5 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import {
   Cancel01Icon,
@@ -23,20 +22,20 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { useState } from "react";
-import { Expense, Category } from "../../lib/types";
+import { Category } from "../../lib/types";
 import { format, subDays, differenceInDays, isSameDay } from "date-fns";
 import { de } from "date-fns/locale";
 import { DateRange } from "react-day-picker";
 import { Calendar } from "@/components/ui/calendar";
 
 interface ExpensesTableToolbarProps {
-  table: Table<Expense>;
-  loading?: boolean;
   dateRange?: DateRange;
   onDateRangeChange: (range: DateRange | undefined) => void;
   categories: Category[];
   selectedCategoryIds: number[];
   onCategoryIdsChange: (ids: number[]) => void;
+  selectedType?: "expense" | "income";
+  onTypeChange?: (type: "expense" | "income" | undefined) => void;
 }
 
 const DAY_OPTIONS = [
@@ -48,18 +47,20 @@ const DAY_OPTIONS = [
 ];
 
 export function ExpensesTableToolbar({
-  table,
-  loading,
   dateRange,
   onDateRangeChange,
   categories,
   selectedCategoryIds,
   onCategoryIdsChange,
+  selectedType,
+  onTypeChange,
 }: ExpensesTableToolbarProps) {
   const [open, setOpen] = useState(false);
+  const [typeOpen, setTypeOpen] = useState(false);
   const [daysOpen, setDaysOpen] = useState(false);
 
-  const hasActiveFilters = selectedCategoryIds.length > 0;
+  const hasActiveFilters =
+    selectedCategoryIds.length > 0 || selectedType !== undefined;
 
   function toggleCategory(categoryId: number) {
     const next = selectedCategoryIds.includes(categoryId)
@@ -168,11 +169,100 @@ export function ExpensesTableToolbar({
         </PopoverContent>
       </Popover>
 
+      <Popover open={typeOpen} onOpenChange={setTypeOpen}>
+        <PopoverTrigger
+          render={
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={typeOpen}
+              className="w-[140px] justify-between"
+            >
+              {!selectedType
+                ? "Typ: Alle"
+                : selectedType === "income"
+                ? "Einnahmen"
+                : "Ausgaben"}
+              <HugeiconsIcon icon={UnfoldMoreIcon} className="opacity-50" />
+            </Button>
+          }
+        />
+        <PopoverContent className="w-[160px] p-0">
+          <Command
+            shouldFilter={false}
+            className="**:data-selected:bg-transparent"
+          >
+            <CommandList>
+              <CommandGroup>
+                <CommandItem
+                  onSelect={() => {
+                    onTypeChange?.(undefined);
+                    setTypeOpen(false);
+                  }}
+                  className={cn(
+                    "cursor-pointer hover:bg-muted!",
+                    !selectedType && "bg-muted"
+                  )}
+                >
+                  <HugeiconsIcon
+                    icon={Tick02Icon}
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      !selectedType ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  Alle Typen
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    onTypeChange?.("expense");
+                    setTypeOpen(false);
+                  }}
+                  className={cn(
+                    "cursor-pointer hover:bg-muted!",
+                    selectedType === "expense" && "bg-muted"
+                  )}
+                >
+                  <HugeiconsIcon
+                    icon={Tick02Icon}
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedType === "expense" ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  Ausgaben
+                </CommandItem>
+                <CommandItem
+                  onSelect={() => {
+                    onTypeChange?.("income");
+                    setTypeOpen(false);
+                  }}
+                  className={cn(
+                    "cursor-pointer hover:bg-muted!",
+                    selectedType === "income" && "bg-muted"
+                  )}
+                >
+                  <HugeiconsIcon
+                    icon={Tick02Icon}
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      selectedType === "income" ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  Einnahmen
+                </CommandItem>
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+
       {hasActiveFilters && (
         <Button
           variant="ghost"
           onClick={() => {
             onCategoryIdsChange([]);
+            onTypeChange?.(undefined);
             setOpen(false);
           }}
         >

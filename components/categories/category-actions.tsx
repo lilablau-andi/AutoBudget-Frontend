@@ -125,8 +125,9 @@ export function CategoryActions({ row, table }: CategoryActionsProps) {
           <DialogHeader>
             <DialogTitle>Kategorie löschen</DialogTitle>
             <DialogDescription>
-              Bist du sicher, dass du die Kategorie "{category.name}" löschen
-              möchtest? Diese Aktion kann nicht rückgängig gemacht werden.
+              Bist du sicher, dass du die Kategorie &quot;{category.name}&quot;
+              löschen möchtest? Diese Aktion kann nicht rückgängig gemacht
+              werden.
             </DialogDescription>
           </DialogHeader>
 

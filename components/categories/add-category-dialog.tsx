@@ -97,8 +97,8 @@ export default function AddCategoryDialog({
           <DialogHeader>
             <DialogTitle>Kategorie hinzufügen</DialogTitle>
             <DialogDescription>
-              Füge hier eine neue Kategorie hinzu. Drücke 'speichern', um die
-              Kategorie zu erstellen.
+              Füge hier eine neue Kategorie hinzu. Drücke &apos;speichern&apos;,
+              um die Kategorie zu erstellen.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
